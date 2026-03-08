@@ -1,0 +1,33 @@
+Use case 1: Recording a completed match and all player performances
+
+This transaction covers inserting one fixture and multiple related player performance records.
+If the transaction is not handled correctly, the fixture could be saved without all player statistics or with only partial data.
+The unwanted phenomenon here is inconsistent data / partial updates.
+The best isolation level is READ UNCOMMITTED, because it prevents other users from seeing half-entered match data while allowing good concurrency.
+
+
+
+Use case 2: Finalising player season performance summaries
+
+This transaction covers calculating season totals from player performance data and writing them into the season summary table.
+If other transactions insert new performance records during the calculation, the totals can change while the transaction is still running.
+The unwanted phenomenon is a phantom read.
+The best isolation level is SERIALIZABLE, because it prevents both updates and new rows from appearing during the aggregation.
+
+
+
+Use case 3: Analytical and monitoring reports (training, fitness, performance)
+
+This transaction covers read-only reporting queries used by coaches and analysts for quick insights.
+Reading slightly inconsistent or in-progress data does not cause serious issues because no data is modified and decisions are not final.
+The potential unwanted phenomenon is a dirty read, which is acceptable in this context.
+The best isolation level is READ UNCOMMITTED, because it avoids blocking and provides the fastest reporting.
+
+
+
+Use case 4: Updating player contract information
+
+This transaction covers reading and updating contract details such as salary or contract dates.
+If one transaction updates a contract while another reads it, the reader may see different values in the same transaction.
+The unwanted phenomenon is a non-repeatable read.
+The best isolation level is REPEATABLE READ, because it guarantees that data read during the transaction cannot change before it finishes.
